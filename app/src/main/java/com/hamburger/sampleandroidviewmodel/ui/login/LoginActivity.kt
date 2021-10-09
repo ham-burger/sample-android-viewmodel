@@ -1,20 +1,20 @@
 package com.hamburger.sampleandroidviewmodel.ui.login
 
 import android.app.Activity
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.Toast
-import com.hamburger.sampleandroidviewmodel.databinding.ActivityLoginBinding
-
+import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.hamburger.sampleandroidviewmodel.R
+import com.hamburger.sampleandroidviewmodel.databinding.ActivityLoginBinding
 
 class LoginActivity : AppCompatActivity() {
 
@@ -24,6 +24,9 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val name = object : Any() {}.javaClass.enclosingMethod.name
+        logcat(name)
+
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -31,9 +34,10 @@ class LoginActivity : AppCompatActivity() {
         val password = binding.password
         val login = binding.login
         val loading = binding.loading
+        val date = binding.date
 
         loginViewModel = ViewModelProvider(this, LoginViewModelFactory())
-                .get(LoginViewModel::class.java)
+            .get(LoginViewModel::class.java)
 
         loginViewModel.loginFormState.observe(this@LoginActivity, Observer {
             val loginState = it ?: return@Observer
@@ -47,6 +51,11 @@ class LoginActivity : AppCompatActivity() {
             if (loginState.passwordError != null) {
                 password.error = getString(loginState.passwordError)
             }
+        })
+
+        loginViewModel.nowData.observe(this, Observer {
+            it ?: return@Observer
+            date?.text = it.toString()
         })
 
         loginViewModel.loginResult.observe(this@LoginActivity, Observer {
@@ -67,16 +76,16 @@ class LoginActivity : AppCompatActivity() {
 
         username.afterTextChanged {
             loginViewModel.loginDataChanged(
-                    username.text.toString(),
-                    password.text.toString()
+                username.text.toString(),
+                password.text.toString()
             )
         }
 
         password.apply {
             afterTextChanged {
                 loginViewModel.loginDataChanged(
-                        username.text.toString(),
-                        password.text.toString()
+                    username.text.toString(),
+                    password.text.toString()
                 )
             }
 
@@ -84,8 +93,8 @@ class LoginActivity : AppCompatActivity() {
                 when (actionId) {
                     EditorInfo.IME_ACTION_DONE ->
                         loginViewModel.login(
-                                username.text.toString(),
-                                password.text.toString()
+                            username.text.toString(),
+                            password.text.toString()
                         )
                 }
                 false
@@ -98,14 +107,43 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    override fun onStop() {
+        val name = object : Any() {}.javaClass.enclosingMethod.name
+        logcat(name)
+        super.onStop()
+    }
+
+    override fun onPause() {
+        val name = object : Any() {}.javaClass.enclosingMethod.name
+        logcat(name)
+
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val name = object : Any() {}.javaClass.enclosingMethod.name
+        logcat(name)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val name = object : Any() {}.javaClass.enclosingMethod.name
+        logcat(name)
+    }
+
+    fun logcat(body: String): Unit {
+        Log.d("test", body)
+    }
+
     private fun updateUiWithUser(model: LoggedInUserView) {
         val welcome = getString(R.string.welcome)
         val displayName = model.displayName
         // TODO : initiate successful logged in experience
         Toast.makeText(
-                applicationContext,
-                "$welcome $displayName",
-                Toast.LENGTH_LONG
+            applicationContext,
+            "$welcome $displayName",
+            Toast.LENGTH_LONG
         ).show()
     }
 
